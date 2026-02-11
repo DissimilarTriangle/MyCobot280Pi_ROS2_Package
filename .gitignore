@@ -1,0 +1,6 @@
+.vscode
+venv_mycobot
+src/mycobot_ros2
+build
+install
+log
