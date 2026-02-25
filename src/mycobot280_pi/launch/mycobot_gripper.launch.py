@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Launch file for MyCobot 280 Pi + Adaptive Gripper in Gazebo simulation.
+Uses the merged Gazebo-compatible URDF: mycobot_280_gazebo_gripper.urdf
+"""
 
 import os
 from launch import LaunchDescription
@@ -19,7 +23,7 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     pkg_name = "mycobot280_pi"
     pkg_share = get_package_share_directory(pkg_name)
-    # 同时需要 mycobot_description 的 share 路径（用于替换夹爪 mesh 的 package://）
+    # Required for resolving gripper mesh package:// URIs
     mycobot_desc_share = get_package_share_directory("mycobot_description")
 
     declare_use_sim_time = DeclareLaunchArgument(
@@ -30,14 +34,17 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration("use_sim_time")
 
     # -------------------------------------------------------------------------
-    # URDF 路径 — 直接使用 mycobot_description 官方包（mycobot_ros2）中的完整带夹爪 URDF
-    # mesh 文件的 package:// URI 也通过该包解析，无需复制文件
+    # File paths — all resolved via pkg_share, no hardcoded absolute paths
     # -------------------------------------------------------------------------
-    # 使用合并后的带夹爪 Gazebo URDF（本包内，不依赖外部包路径）
+    # Merged Gazebo-compatible URDF with adaptive gripper
     urdf_path = os.path.join(pkg_share, "urdf", "mycobot_280_gazebo_gripper.urdf")
 
     if not os.path.isfile(urdf_path):
-        raise FileNotFoundError(f"合并后的带夹爪 URDF 未找到: {urdf_path}")
+        raise FileNotFoundError(
+            f"Merged gripper URDF not found: {urdf_path}\n"
+            f"Please ensure mycobot_280_gazebo_gripper.urdf is placed under "
+            f"src/mycobot280_pi/urdf/ and the package has been rebuilt."
+        )
 
     controllers_yaml = os.path.join(
         pkg_share, "config", "mycobot_280_controllers.yaml"
@@ -46,19 +53,21 @@ def generate_launch_description():
     world_to_use = world_path if os.path.exists(world_path) else "empty.sdf"
 
     # -------------------------------------------------------------------------
-    # 读取 URDF
+    # Read URDF and resolve all package:// URIs to absolute paths
+    # (Gazebo does not resolve package:// URIs natively)
     # -------------------------------------------------------------------------
     with open(urdf_path, "r") as fh:
         robot_description_str = fh.read()
 
+    # Replace controller config path placeholder
     robot_description_str = robot_description_str.replace(
         "MYCOBOT_CONFIG_PATH", controllers_yaml
     )
-    # 替换机械臂 mesh 路径
+    # Resolve arm mesh URIs
     robot_description_str = robot_description_str.replace(
         "package://mycobot280_pi/", pkg_share + "/"
     )
-    # 替换夹爪 mesh 路径（来自 mycobot_description 包）
+    # Resolve gripper mesh URIs (from mycobot_description / mycobot_ros2)
     robot_description_str = robot_description_str.replace(
         "package://mycobot_description/", mycobot_desc_share + "/"
     )
@@ -77,7 +86,7 @@ def generate_launch_description():
     )
 
     # -------------------------------------------------------------------------
-    # Gazebo
+    # Gazebo simulator
     # -------------------------------------------------------------------------
     ros_gz_sim_share = get_package_share_directory("ros_gz_sim")
     gz_launch_file = os.path.join(ros_gz_sim_share, "launch", "gz_sim.launch.py")
@@ -89,6 +98,9 @@ def generate_launch_description():
         }.items(),
     )
 
+    # -------------------------------------------------------------------------
+    # Spawn robot entity in Gazebo
+    # -------------------------------------------------------------------------
     gz_spawn_entity = Node(
         package="ros_gz_sim",
         executable="create",
@@ -102,6 +114,9 @@ def generate_launch_description():
         parameters=[robot_description_param],
     )
 
+    # -------------------------------------------------------------------------
+    # ROS-Gazebo clock bridge
+    # -------------------------------------------------------------------------
     bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
@@ -112,6 +127,7 @@ def generate_launch_description():
 
     # -------------------------------------------------------------------------
     # Controller spawners
+    # Startup order: joint_state_broadcaster -> arm controller -> gripper controller
     # -------------------------------------------------------------------------
     spawner_js = Node(
         package="controller_manager",
@@ -135,18 +151,21 @@ def generate_launch_description():
         output="screen",
     )
 
+    # Spawn complete -> 5s delay -> start joint_state_broadcaster
     start_js_after_spawn = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=gz_spawn_entity,
             on_start=[TimerAction(period=5.0, actions=[spawner_js])],
         )
     )
+    # joint_state_broadcaster exits -> 2s delay -> start arm controller
     start_arm_after_js_exit = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=spawner_js,
             on_exit=[TimerAction(period=2.0, actions=[spawner_arm])],
         )
     )
+    # Arm controller exits -> 2s delay -> start gripper controller
     start_gripper_after_arm_exit = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=spawner_arm,
@@ -154,7 +173,7 @@ def generate_launch_description():
         )
     )
 
-    info = LogInfo(msg=[f"Using URDF: {urdf_path}"])
+    info = LogInfo(msg=[f"Launching MyCobot 280 Pi + Adaptive Gripper. URDF: {urdf_path}"])
 
     return LaunchDescription([
         declare_use_sim_time,
