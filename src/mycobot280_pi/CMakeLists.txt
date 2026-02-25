@@ -17,6 +17,7 @@ install(PROGRAMS
   scripts/move_mycobot.py
   scripts/log_joint_data.py
   scripts/python_node.py
+  scripts/move_mycobot_gripper.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
