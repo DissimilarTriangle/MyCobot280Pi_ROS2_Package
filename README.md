@@ -16,7 +16,7 @@ ROS2 control package used for MyCobot 280pi Manipulator. Supports RViz visualiza
 ## Package Structure
 
 ```
-my_cobot_control    -- RViz Control Package
+my_cobot_control    -- Manipulator Control Package and Calibration Tools
 mycobot_ros2        -- Official ROS 2 Package for myCobot Manipulator (URDF)
 mycobot280_pi       -- Gazebo Simulation Package (mltejas88/Project_Mycobot_280pi_simulation)
 ```
