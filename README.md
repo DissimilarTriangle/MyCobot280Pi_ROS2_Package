@@ -50,7 +50,7 @@ cd ~/mycobot_ws/src
 
 ```bash
 # Clone this package
-git clone https://github.com/YOUR_USERNAME/my_cobot_control.git
+git clone https://github.com/DissimilarTriangle/MyCobot280Pi_ROS2_Package
 
 # Clone the official mycobot_ros2 package (provides URDF model)
 # The official repository only supports Humble, but you can try to use it in Jazzy as well.
