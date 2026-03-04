@@ -30,6 +30,9 @@ python3 src/my_cobot_control/my_cobot_control/manual_test.py custom 50.0 -200.0 
 ```bash
 # 发送pickup命令（使用标定的pickup坐标）
 ros2 topic pub --once /arm/target_pick geometry_msgs/msg/Point "{x: 202.2, y: -129.3, z: 237.9}"
+---
+data: releasing
+---
 
 # 发送place命令（使用标定的place坐标）
 ros2 topic pub --once /arm/target_place geometry_msgs/msg/Point "{x: 66.7, y: -218.2, z: 123.7}"
