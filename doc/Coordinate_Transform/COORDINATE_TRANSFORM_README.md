@@ -244,8 +244,8 @@ ros2 topic pub --once /arm/target_pick geometry_msgs/msg/Point \
 
 ```bash
 # 1. 安装依赖
-sudo apt install -y ros-humble-tf2-ros ros-humble-tf2-geometry-msgs \
-                     ros-humble-tf2-tools ros-humble-tf-transformations
+sudo apt install -y ros-jazzy-tf2-ros ros-jazzy-tf2-geometry-msgs \
+                     ros-jazzy-tf2-tools ros-jazzy-tf-transformations
 
 # 2. 编译
 cd ~/mycobot_ws

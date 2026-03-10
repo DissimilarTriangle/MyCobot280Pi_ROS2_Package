@@ -8,10 +8,10 @@
 # 安装 TF2 相关包
 sudo apt update
 sudo apt install -y \
-    ros-humble-tf2-ros \
-    ros-humble-tf2-geometry-msgs \
-    ros-humble-tf2-tools \
-    ros-humble-tf-transformations
+    ros-jazzy-tf2-ros \
+    ros-jazzy-tf2-geometry-msgs \
+    ros-jazzy-tf2-tools \
+    ros-jazzy-tf-transformations
 
 # 安装 Python 依赖
 pip install transforms3d
