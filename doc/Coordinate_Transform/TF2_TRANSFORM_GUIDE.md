@@ -462,10 +462,10 @@ ros2 run tf2_ros tf2_echo camera_link arm_base_link
 
 ```bash
 # 安装 TF2 相关包
-sudo apt install ros-humble-tf2-ros \
-                 ros-humble-tf2-geometry-msgs \
-                 ros-humble-tf2-tools \
-                 ros-humble-tf-transformations
+sudo apt install ros-jazzy-tf2-ros \
+                 ros-jazzy-tf2-geometry-msgs \
+                 ros-jazzy-tf2-tools \
+                 ros-jazzy-tf-transformations
 
 # 如果使用 Python，还需要安装
 pip install transforms3d

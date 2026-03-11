@@ -148,7 +148,7 @@ killall -9 ruby gz
 
 ---
 
-# 3 Hardware Controller (Real Arm)
+# 3 Hardware Controller Test (Real Arm)
 
 ## 3.1 Architecture Overview
 
@@ -193,6 +193,15 @@ NUC                                           Pi (arm)
  │◄── sub /arm/status == "idle" ───────────────│  Done, ready for next block
 ```
 
+```
+TF2 Frame Hierarchy:
+camera_link
+  └── arm_base_link
+        └── joint6_flange
+              └── gripper_base
+                    └── gripper_tip
+```
+
 ## 3.2 Run on Pi (Real Hardware)
 
 ### Deploy to Pi
@@ -227,16 +236,21 @@ ros2 launch my_cobot_control arm_controller.launch.py rviz:=true
 ros2 run my_cobot_control mycobot_controller --ros-args -r __ns:=/arm
 ```
 
-## 3.3 Run on NUC (Mock Mode / Development)
+## 3.3 Run on Dev Machine (Mock Mode / Development)
 
 When no hardware is connected (no `/dev/ttyAMA0`), the controller automatically enters **MOCK mode** — all hardware calls are simulated with print outputs.
 
 ```bash
-# On NUC (dev machine)
+# On dev machine
 cd ~/mycobot_ws
 colcon build --packages-select my_cobot_control
 source install/setup.bash
-ros2 launch my_cobot_control arm_controller.launch.py
+
+# Development environment (default, launch GUI)
+ros2 launch my_cobot_control mycobot_with_tf2.launch.py
+
+# Real environment (do not launch GUI)
+ros2 launch my_cobot_control mycobot_with_tf2.launch.py use_mock:=false
 ```
 
 ## 3.4 Test Commands
@@ -318,16 +332,25 @@ ros2 topic list | grep arm
 #   /arm/target_place
 ```
 
+### Test 7: TF2 Transform Validation
+```bash
+# Check TF2 tree structure
+cd ~/mycobot_ws  #or cd ~/ros2_ws
+ros2 run tf2_tools view_frames
+evince frames.pdf
+
+# Run the TF2 transform test script (requires camera TF setup)
+cd ~/ros2_ws/scripts
+python3 scripts/test_tf2_transform.py
+```
+
 ## 3.6 Standalone Calibration Test (No ROS 2)
 
 A standalone script is available for testing pick-and-place with calibrated coordinates directly on the Pi, **without ROS 2**:
 
 ```bash
-# SSH into Pi
-ssh elephant@10.3.14.59
-
 # Run directly with Python (requires pymycobot)
-cd ~/ros2_ws/src/my_cobot_control/my_cobot_control
+cd ~/ros2_ws/scripts
 python3 test_calibration_pick_place.py
 ```
 
@@ -339,7 +362,7 @@ Use the calibration tool to record new home/pickup/place positions by dragging t
 
 ```bash
 # On Pi
-cd ~/ros2_ws/src/my_cobot_control/my_cobot_control
+cd ~/ros2_ws/scripts
 python3 calibration_tool.py
 ```
 

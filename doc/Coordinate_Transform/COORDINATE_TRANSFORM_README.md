@@ -1,30 +1,30 @@
 # 摄像头坐标转换完整指南 / Complete Camera Transform Guide
 
-## 📚 文档导航 / Documentation Navigation
+## 文档导航 / Documentation Navigation
 
 本仓库包含两种坐标转换实现方式及相关文档：
 
 ### 核心文档 / Core Documents
 
-1. **[TF2_COMPARISON.md](TF2_COMPARISON.md)** ⭐ **从这里开始！**
+1. **[TF2_COMPARISON.md](TF2_COMPARISON.md)** **从这里开始！**
    - 两种方法的详细对比
    - 可视化图示
    - 决策流程图
    - 推荐阅读：10 分钟
 
-2. **[TF2_QUICK_START.md](TF2_QUICK_START.md)** 🚀
+2. **[TF2_QUICK_START.md](TF2_QUICK_START.md)**
    - TF2 快速上手指南
    - 安装、配置、测试步骤
    - 常见问题解答
    - 推荐阅读：5 分钟
 
-3. **[TF2_TRANSFORM_GUIDE.md](TF2_TRANSFORM_GUIDE.md)** 📖
+3. **[TF2_TRANSFORM_GUIDE.md](TF2_TRANSFORM_GUIDE.md)**
    - TF2 详细技术文档
    - 坐标系树设计
    - 高级用法和示例
    - 推荐阅读：20 分钟
 
-4. **[CAMERA_TRANSFORM_GUIDE.md](CAMERA_TRANSFORM_GUIDE.md)** 📐
+4. **[CAMERA_TRANSFORM_GUIDE.md](CAMERA_TRANSFORM_GUIDE.md)**
    - 静态参数方式详细指南
    - 标定方法
    - 配置示例
@@ -32,13 +32,13 @@
 
 ---
 
-## 🎯 快速决策 / Quick Decision
+## 快速决策 / Quick Decision
 
-### 我应该使用哪种方法？
+### 应该使用哪种方法？
 
 ```
 ┌─────────────────────────────────────────┐
-│  你的小车会移动吗？                      │
+│  小车会移动吗？                      │
 │  Will your rover move?                  │
 └───────────┬─────────────────────────────┘
             │
@@ -62,7 +62,7 @@ Use TF2         Either works
 
 ---
 
-## 📦 代码文件清单 / Code Files
+## 代码文件清单 / Code Files
 
 ### 静态参数方式 / Static Parameter Method
 
