@@ -49,14 +49,14 @@ def generate_launch_description():
     )
 
     camera_x_arg = DeclareLaunchArgument(
-        'camera_x', default_value='0.2',
-        description='Camera X offset from arm base (m), positive = right')
+        'camera_x', default_value='0.0379',
+        description='Camera X offset from arm base (m), positive = front')
     camera_y_arg = DeclareLaunchArgument(
-        'camera_y', default_value='-0.1',
-        description='Camera Y offset from arm base (m), positive = left')
+        'camera_y', default_value='0.0641',
+        description='Camera Y offset from arm base (m), positive = right')
     camera_z_arg = DeclareLaunchArgument(
-        'camera_z', default_value='0.3',
-        description='Camera Z offset from arm base (m), positive = up')
+        'camera_z', default_value='-0.0486',
+        description='Camera Z offset from arm base (m), positive = down')
     camera_pitch_arg = DeclareLaunchArgument(
         'camera_pitch', default_value='-0.5236')  # -30° in rad
 
