@@ -209,10 +209,10 @@ camera_link
 ### Deploy to Pi
 ```bash
 # From NUC, copy the source to Pi
-scp -r ~/mycobot_ws/src/my_cobot_control elephant@10.3.14.59:~/ros2_ws/src/
+scp -r ~/mycobot_ws/src/my_cobot_control elephant@10.0.0.3:~/ros2_ws/src/
 
 # SSH into Pi
-ssh elephant@10.3.14.59
+ssh elephant@10.0.0.3
 # password: trunk
 
 # Build on Pi
@@ -245,11 +245,14 @@ cd ~/mycobot_ws
 colcon build --packages-select my_cobot_control
 source install/setup.bash
 
-# Development environment (default, launch joint control GUI)
+# Default: real hardware + base_link->g_base
 ros2 launch my_cobot_control mycobot_with_tf2.launch.py
 
-# Real environment (with out GUI)
-ros2 launch my_cobot_control mycobot_with_tf2.launch.py use_mock:=false
+# Mock mode (no hardware, with GUI for joint angles)
+ros2 launch my_cobot_control mycobot_with_tf2.launch.py use_mock:=true
+
+# Mock mode with camera_link
+ros2 launch my_cobot_control mycobot_with_tf2.launch.py use_mock:=true use_camera_link:=true
 
 # With RViz visualization (optional, requires TF2 setup)
 ros2 launch my_cobot_control mycobot_with_rviz.launch.py
