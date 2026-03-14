@@ -3,7 +3,7 @@
 Launch file for MyCobot with TF2 coordinate transforms.
 
 This launch file:
-1. Broadcasts static TF2 transforms for camera, arm, and gripper
+1. Broadcasts static TF2 transforms for arm, and gripper
 2. Starts the TF2-enabled mycobot controller
 
 TF2 Frame Hierarchy (with use_camera_link=true):

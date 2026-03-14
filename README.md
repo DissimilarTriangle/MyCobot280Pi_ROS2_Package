@@ -198,7 +198,7 @@ NUC                                           Pi (arm)
 
 ```
 TF2 Frame Hierarchy:
-camera_link
+base_link
   └── arm_base_link
         └── joint6_flange
               └── gripper_tip
@@ -209,11 +209,23 @@ camera_link
 ### Deploy to Pi
 ```bash
 # From NUC, copy the source to Pi
-scp -r ~/mycobot_ws/src/my_cobot_control elephant@10.0.0.3:~/ros2_ws/src/
+scp -r ~/mycobot_ws/src/my_cobot_control elephant@10.0.1.3:~/ros2_ws/src/
 
 # SSH into Pi
-ssh elephant@10.0.0.3
+ssh elephant@10.0.1.3
 # password: trunk
+
+# syc time
+sudo date -s "$(ssh leo-rover-12@10.0.1.4 'date -u +%Y-%m-%d\ %H:%M:%S.%N')"
+sudo date -s "$(ssh student42@10.0.1.4 'date -u +%Y-%m-%d\ %H:%M:%S.%N')"
+# check NTP status for timesync
+sudo systemctl status ntp
+# check hardware clock
+timedatectl  
+
+# netplan
+sudo nano /etc/netplan/99-wired-static.yaml
+sudo netplan apply
 
 # Build on Pi
 cd ~/ros2_ws
@@ -224,7 +236,7 @@ source install/setup.bash
 ### Launch the arm controller
 ```bash
 # On Pi — start the controller (all nodes under /arm namespace)
-ros2 launch my_cobot_control mycobot_with_tf2.launch.py use_mock:=false
+ros2 launch my_cobot_control mycobot_with_tf2.launch.py
 
 # With custom parameters
 ros2 launch my_cobot_control mycobot_with_tf2.launch.py use_mock:=false safe_z:=250.0 move_speed:=40
@@ -392,8 +404,7 @@ ros2 run my_cobot_control mycobot_controller --ros-args \
 | `Object lost during lift` | Grip too weak or object slipped | Increase `gripper_torque` parameter (up to 980) |
 | `Coordinate x=... out of range` | Target outside workspace | Check coordinate frame, values must be in mm |
 | Build error: `shebang too long` | venv path hardcoded on Pi | `setup.py` auto-detects venv; rebuild |
-|Timesync issue (hardware clock drift) | Arm movements erratic | Sync Pi clock with NUC: `ssh elephant@10.3.14.59 "sudo date -s '$(date -u +%m%d%H%M%Y.%S)'"`|
-
+|Timesync issue (hardware clock drift) | Arm movements erratic | Sync Pi clock with NUC: `ssh elephant@10.0.1.4 "sudo date -s '$(date -u +%m%d%H%M%Y.%S)'"`|
 ---
 
 ## 4. ROS2 Communication Interface Reference
@@ -415,15 +426,15 @@ ros2 run my_cobot_control mycobot_controller --ros-args \
 
 | Full Topic | Message Type | Frame | Description |
 |---|---|---|---|
-| `/arm/target_pick` | `geometry_msgs/msg/Point` | `camera_link` | 3D pick coords (mm). Only accepted in `IDLE` state. Triggers full pick sequence. |
-| `/arm/target_place` | `geometry_msgs/msg/Point` | `camera_link` | 3D place coords (mm). Only accepted in `HOLDING` state. Triggers place + return. |
+| `/arm/target_pick` | `geometry_msgs/msg/Point` | `base_link` | 3D pick coords (mm). Only accepted in `IDLE` state. Triggers full pick sequence. |
+| `/arm/target_place` | `geometry_msgs/msg/Point` | `base_link` | 3D place coords (mm). Only accepted in `HOLDING` state. Triggers place + return. |
 
 **Message field layout (`geometry_msgs/msg/Point`):**
 
 ```yaml
-x: float64   # X coordinate (mm) in camera_link frame
-y: float64   # Y coordinate (mm) in camera_link frame
-z: float64   # Z coordinate (mm) in camera_link frame
+x: float64   # X coordinate (mm) in base_link frame
+y: float64   # Y coordinate (mm) in base_link frame
+z: float64   # Z coordinate (mm) in base_link frame
 ```
 
 **Coordinate Limits (arm base frame, after TF2 transform):**
@@ -492,12 +503,12 @@ position: [j1, j2, j3, j4, j5, j6]   # radians
 
 | Frame | Parent | Source | Description |
 |---|---|---|---|
-| `camera_link` | — | NUC / Camera node | Camera optical origin. Input coords are in this frame |
-| `g_base` | `camera_link` | Static TF (launch file) | Arm base (`arm_base_link` in URDF). Fixed offset from camera |
+| `base_link` | — | NUC / Camera node | Camera optical origin. Input coords are in this frame |
+| `g_base` | `base_link` | Static TF (launch file) | Arm base (`arm_base_link` in URDF). Fixed offset from base_link (rover) |
 | `joint6_flange` | `g_base` | `robot_state_publisher` | End-effector flange |
 | `gripper_tip` | `joint6_flange` | Static TF (launch file) | Gripper finger tip. Z offset = 79 mm |
 
-Default static transform (`camera_link` → `g_base`):
+Default static transform (`base_link` → `g_base`):
 
 | Param | Default | Description |
 |---|---|---|
@@ -615,7 +626,7 @@ def main():
 Make sure the same `ROS_DOMAIN_ID` is set on both NUC and Pi:
 
 ```bash
-export ROS_DOMAIN_ID=42   # or any agreed value, default 0
+export ROS_DOMAIN_ID=12   # or any agreed value, default 0
 ```
 
 For persistent setting, add to `~/.bashrc` on both machines.
