@@ -17,8 +17,8 @@
 
 | Full Topic | Message Type | Frame | Description |
 |---|---|---|---|
-| `/arm/target_pick` | `geometry_msgs/msg/Point` | `base_link` | 3D pick coords (mm). Only accepted in `IDLE` state. Triggers full pick sequence. |
-| `/arm/target_place` | `geometry_msgs/msg/Point` | `base_link` | 3D place coords (mm). Only accepted in `HOLDING` state. Triggers place + return. |
+| `/arm/target_pick` | `geometry_msgs/msg/Point` | `base_link` | 3D pick coords (m). Only accepted in `IDLE` state. Triggers full pick sequence. |
+| `/arm/target_place` | `geometry_msgs/msg/Point` | `base_link` | 3D place coords (m). Only accepted in `HOLDING` state. Triggers place + return. |
 
 **Message field layout (`geometry_msgs/msg/Point`):**
 
@@ -85,19 +85,33 @@ position: [j1, j2, j3, j4, j5, j6]   # radians
 
 | Frame | Parent | Source | Description |
 |---|---|---|---|
-| `base_link` | — | NUC / Camera node | Camera optical origin. Input coords are in this frame |
-| `g_base` | `base_link` | Static TF (launch file) | Arm base (`arm_base_link` in URDF). Fixed offset from base_link (rover) |
+| `base_link` | — | Rover base | Rover base origin. Input coords are in this frame |
+| `camera_link` | `base_link` | Static TF (launch file) | Camera optical origin. Fixed offset from `base_link` |
+| `g_base` | `base_link` | Static TF (launch file) | Arm base. Fixed offset from `base_link` |
 | `joint6_flange` | `g_base` | `robot_state_publisher` | End-effector flange |
-| `gripper_tip` | `joint6_flange` | Static TF (launch file) | Gripper finger tip. Z offset = 79 mm |
+| `gripper_tip` | `joint6_flange` | Static TF (launch file) | Gripper finger tip. Y offset = 10 mm, Z offset = 95 mm |
+
+Default static transform (`base_link` → `camera_link`):
+
+| Param | Default | Description |
+|---|---|---|
+| `base_to_camera_x` | `0.158` m | X offset |
+| `base_to_camera_y` | `0.007` m | Y offset |
+| `base_to_camera_z` | `0.081` m | Z offset |
+| `base_to_camera_roll` | `-1.9199` rad | Roll (20 + 90 degrees) |
+| `base_to_camera_pitch` | `0.0` rad | Pitch |
+| `base_to_camera_yaw` | `-1.5708` rad | Yaw (90 degrees) |
 
 Default static transform (`base_link` → `g_base`):
 
 | Param | Default | Description |
 |---|---|---|
-| `camera_x` | `0.0379` m | X offset |
-| `camera_y` | `0.0641` m | Y offset |
-| `camera_z` | `-0.0486` m | Z offset |
-| `camera_pitch` | `-0.5236` rad | Pitch (-30°) |
+| `base_x` | `0.05500` m | X offset |
+| `base_y` | `0.03594` m | Y offset |
+| `base_z` | `0.01097` m | Z offset |
+| `base_roll` | `0.0` rad | Roll |
+| `base_pitch` | `0.0` rad | Pitch |
+| `base_yaw` | `0.0` rad | Yaw |
 
 ---
 
@@ -105,23 +119,24 @@ Default static transform (`base_link` → `g_base`):
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `safe_z` | float | `250.0` | Safe travel height (mm) |
-| `move_speed` | int | `40` | Arm speed (1–100) |
+| `safe_z` | float | `0.200` | Safe travel height (m) |
+| `move_speed` | int | `30` | Arm speed (1–100) |
 | `gripper_speed` | int | `80` | Gripper speed (1–100) |
 | `gripper_torque` | int | `300` | Gripper holding torque (1–980) |
 | `grip_threshold` | int | `25` | Min gripper value to confirm grip |
 | `grip_check_retries` | int | `2` | Number of grip check retries |
-| `end_rx` | float | `-178.0` | End-effector roll (deg) |
+| `end_rx` | float | `-180.0` | End-effector roll (deg) |
 | `end_ry` | float | `0.0` | End-effector pitch (deg) |
-| `end_rz` | float | `0.0` | End-effector yaw (deg) |
-| `home_angles` | float[] | `[0,0,0,0,0,0]` | Home joint angles (deg) |
+| `end_rz` | float | `-135.0` | End-effector yaw (deg) |
+| `home_angles` | float[] | `[0,0,0,0,0,45.0]` | Home joint angles (deg) |
 | `calibration_file` | string | `''` | Path to calibration JSON |
 | `camera_frame` | string | `camera_link` | TF2 source frame for input coords |
 | `arm_base_frame` | string | `g_base` | TF2 arm base frame |
+| `flange_frame` | string | `joint6_flange` | TF2 flange frame |
+| `gripper_tip_frame` | string | `gripper_tip` | TF2 gripper tip frame |
 | `tf_timeout` | float | `1.0` | TF2 lookup timeout (s) |
-| `compensate_gripper_offset` | bool | `true` | Auto subtract gripper Z offset |
-| `gripper_offset_z` | float | `79.0` | Fallback gripper Z offset (mm) |
-| `use_mock` | bool | `true` | Launch joint GUI (dev) or real hw |
+| `compensate_gripper_offset` | bool | `true` | Auto subtract gripper offset |
+| `use_mock` | bool | `false` | Launch joint GUI (dev) or real hw |
 
 ---
 
